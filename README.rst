@@ -2,6 +2,33 @@ django-livewatch
 ================
 livewatch.de integration for django projects
 
+
+Installation
+============
+
+* Install ``django-livewatch`` (or `download from PyPI <http://pypi.python.org/pypi/django-livewatch>`_):
+
+.. code-block:: python
+
+    pip install django-livewatch
+
+* Add ``livewatch`` to ``INSTALLED_APPS`` in ``settings.py``:
+
+.. code-block:: python
+
+    INSTALLED_APPS = (
+        # other apps
+        'livewatch',
+    )
+
+* Include ``livewatch.urls`` in your ``urls.py``:
+
+.. code-block:: python
+
+    urlpatterns += patterns('',
+        (r'^livewatch/', include('livewatch.urls')),
+    )
+
 Resources
 =========
 
