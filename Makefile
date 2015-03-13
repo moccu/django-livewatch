@@ -29,7 +29,7 @@ devinstall:
 
 docs: clean-build
 	pip install -e .
-	pip install -r requirements-docs.txt
+	pip install -r resources/requirements-docs.txt
 	sphinx-apidoc --force -o docs/source/modules/ livewatch livewatch/settings.py livewatch/tests/
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
