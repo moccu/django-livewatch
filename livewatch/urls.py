@@ -6,4 +6,5 @@ from .views import LiveWatchView
 urlpatterns = patterns(
     '',
     url(r'^$', LiveWatchView.as_view(), name='livewatch'),
+    url(r'^(?P<service>\w+)/$', LiveWatchView.as_view(), name='livewatch-service'),
 )
