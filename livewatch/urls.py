@@ -1,9 +1,9 @@
-from django.conf.urls import patterns
+from django.conf.urls import patterns, url
 
-from .views import livewatch
+from .views import LiveWatchView
 
 
 urlpatterns = patterns(
     '',
-    (r'^$', livewatch),
+    url(r'^$', LiveWatchView.as_view(), name='livewatch'),
 )

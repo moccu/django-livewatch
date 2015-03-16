@@ -1,13 +1,16 @@
 import re
 
 from django.http import HttpResponse, HttpResponseNotFound
+from django.views.generic import View
 
 
-def livewatch(request):
-    if 'key' not in request.REQUEST:
-        return HttpResponse('Ok')
+class LiveWatchView(View):
 
-    if re.match(r'^[a-f0-9]{32}$', request.REQUEST['key']):
-        return HttpResponse(request.REQUEST['key'])
+    def get(self, request, *args, **kwargs):
+        if 'key' not in request.GET:
+            return HttpResponse('Ok')
 
-    return HttpResponseNotFound()
+        if re.match(r'^[a-f0-9]{32}$', request.GET['key']):
+            return HttpResponse(request.GET['key'])
+
+        return HttpResponseNotFound()
