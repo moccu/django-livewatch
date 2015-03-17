@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import mock
 import pytest
 
@@ -5,19 +7,18 @@ from datetime import datetime, timedelta
 from django.core.cache import cache
 from django.utils import timezone
 
-from livewatch.extensions.base import Extension
-from livewatch.extensions.rq import RqExtension
-from livewatch.tasks import livewatch_update_task
+from ..extensions.base import Extension
+from ..extensions.rq import RqExtension, livewatch_update_task
 
 
 class TestBaseExtension:
 
-    def test_check_not_implemented(self, rf):
+    def test_check_service_not_implemented(self, rf):
         ext = Extension()
         request = rf.get('/')
 
         with pytest.raises(NotImplementedError):
-            ext.check(request)
+            ext.check_service(request)
 
 
 class TestRqExtension:
@@ -31,7 +32,7 @@ class TestRqExtension:
         livewatch_update_task()
         assert isinstance(cache.get('livewatch_watchdog'), datetime) is True
 
-    @mock.patch('livewatch.tasks.cache.set')
+    @mock.patch('livewatch.extensions.rq.cache.set')
     def test_livewatch_update_task_error(self, cache_mock):
         cache_mock.side_effect = Exception
 

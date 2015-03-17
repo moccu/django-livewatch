@@ -1,7 +1,13 @@
+from __future__ import absolute_import
+
 import mock
 import pytest
 
 from django.core.urlresolvers import reverse
+from django.test.utils import patch_logger
+
+from ..extensions.rq import RqExtension
+from ..views import LiveWatchView
 
 
 @pytest.mark.django_db
@@ -9,6 +15,30 @@ class TestLiveWatchView:
 
     def test_url(self):
         assert '/' == reverse('livewatch')
+
+    def test_url_service(self, settings):
+        expected_url = reverse('livewatch-service', kwargs={'service': 'testservice'})
+        assert '/testservice/' == expected_url
+
+    def test_get_extensions(self, settings):
+        settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
+        view = LiveWatchView()
+
+        extensions = view.get_extensions()
+        assert len(extensions) == 1
+        assert 'rq' in extensions
+        assert isinstance(extensions['rq'], RqExtension)
+
+    def test_get_extensions_error(self, settings):
+        settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.foo:BarExtension']
+        view = LiveWatchView()
+
+        with patch_logger(
+                'livewatch.views', 'error') as calls:
+            view.get_extensions()
+
+            assert len(calls) == 1
+            assert calls[0] == 'Failed to import livewatch.extensions.foo:BarExtension'
 
     def test_get(self, client):
         url = reverse('livewatch')
@@ -28,13 +58,20 @@ class TestLiveWatchView:
         assert response.status_code == 404
         assert response.content == b''
 
-    def test_url_rq(self, settings):
-        assert '/rq/' == reverse('livewatch-service', kwargs={'service': 'rq'})
-
-    @mock.patch('livewatch.extensions.rq.django_rq.enqueue')
-    def test_get_service_error(self, service_mock, client, settings):
+    @mock.patch('livewatch.extensions.rq.RqExtension.check_service')
+    def test_get_service_rq(self, service_mock, client, settings):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
-        service_mock.return_value = None
+        service_mock.return_value = True
+
+        url = reverse('livewatch-service', kwargs={'service': 'rq'})
+        response = client.get(url)
+        assert response.status_code == 200
+        assert response.content == b'Ok'
+
+    @mock.patch('livewatch.extensions.rq.RqExtension.check_service')
+    def test_get_service_rq_error(self, service_mock, client, settings):
+        settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
+        service_mock.return_value = False
 
         url = reverse('livewatch-service', kwargs={'service': 'rq'})
         response = client.get(url)
