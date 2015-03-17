@@ -18,9 +18,13 @@ def test_get_extensions(settings):
 def test_get_extensions_error(settings):
     settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.foo:BarExtension']
 
-    with patch_logger(
-            'livewatch.utils', 'error') as calls:
+    with patch_logger('livewatch.utils', 'error') as calls:
         get_extensions(reload_extensions=True)
 
         assert len(calls) == 1
         assert calls[0] == 'Failed to import livewatch.extensions.foo:BarExtension'
+
+
+def test_get_extensions_hasattr_cache(settings):
+    get_extensions._cache = 'foobar'
+    assert get_extensions() == 'foobar'

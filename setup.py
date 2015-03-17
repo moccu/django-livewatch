@@ -51,6 +51,7 @@ test_requirements = [
     'pep8==1.6.2',
     'mock==1.0.1',
     'factory-boy==2.4.1',
+    'django-celery==3.1.16',
     'django-rq==0.7.0',
     'redis==2.10.3'
 ]

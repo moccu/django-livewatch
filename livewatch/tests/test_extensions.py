@@ -3,22 +3,76 @@ from __future__ import absolute_import
 import mock
 import pytest
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.core.cache import cache
 from django.utils import timezone
 
-from ..extensions.base import Extension
-from ..extensions.rq import RqExtension, livewatch_update_task
+
+from ..extensions.base import BaseExtension, TaskExtension
+from ..extensions.rq import RqExtension
+from .resources.mock import MockExtension, MockTaskExtension
 
 
 class TestBaseExtension:
 
+    def test_check_service(self, rf):
+        extension = MockExtension()
+        request = rf.get('/')
+
+        assert extension.check_service(request) == 'mock check service'
+
     def test_check_service_not_implemented(self, rf):
-        ext = Extension()
+        extension = BaseExtension()
         request = rf.get('/')
 
         with pytest.raises(NotImplementedError):
-            ext.check_service(request)
+            extension.check_service(request)
+
+
+class TestTaskExtension:
+
+    def setup(self):
+        cache.delete('livewatch_watchdog')
+
+    def test_run_task(self):
+        extension = MockTaskExtension()
+
+        assert extension.run_task() == 'mock run task'
+
+    def test_run_task_not_implemented(self):
+        extension = TaskExtension()
+
+        with pytest.raises(NotImplementedError):
+            extension.run_task()
+
+    @mock.patch('livewatch.extensions.base.TaskExtension.run_task')
+    def test_check_service(self, run_task_mock, rf):
+        time = timezone.now() - timedelta(minutes=5)
+        cache.set('livewatch_watchdog', time, 2592000)
+
+        request = rf.get('/')
+        extension = TaskExtension()
+
+        assert extension.check_service(request) is True
+
+    @mock.patch('livewatch.extensions.base.TaskExtension.run_task')
+    def test_check_service_cache_none(self, run_task_mock, rf):
+        run_task_mock.return_value = None
+
+        request = rf.get('/')
+        extension = TaskExtension()
+
+        assert extension.check_service(request) is False
+
+    @mock.patch('livewatch.extensions.base.TaskExtension.run_task')
+    def test_check_service_timeout(self, run_task_mock, rf):
+        time = timezone.now() - timedelta(minutes=16)
+        cache.set('livewatch_watchdog', time, 2592000)
+
+        request = rf.get('/')
+        extension = TaskExtension()
+
+        assert extension.check_service(request) is False
 
 
 class TestRqExtension:
@@ -26,43 +80,9 @@ class TestRqExtension:
     def setup(self):
         cache.delete('livewatch_watchdog')
 
-    def test_livewatch_update_task(self):
-        assert cache.get('livewatch_watchdog') is None
-
-        livewatch_update_task()
-        assert isinstance(cache.get('livewatch_watchdog'), datetime) is True
-
-    @mock.patch('livewatch.extensions.rq.cache.set')
-    def test_livewatch_update_task_error(self, cache_mock):
-        cache_mock.side_effect = Exception
-
-        assert livewatch_update_task() is False
-        assert cache.get('livewatch_watchdog') is None
-
-    def test_check_service(self, rf):
-        time = timezone.now() - timedelta(minutes=5)
-        cache.set('livewatch_watchdog', time, 2592000)
-
-        request = rf.get('/')
-        rq = RqExtension()
-
-        assert rq.check_service(request) is True
-
     @mock.patch('livewatch.extensions.rq.django_rq.enqueue')
-    def test_check_service_cache_none(self, service_mock, rf):
-        service_mock.return_value = None
+    def test_run_task(self, mock_task):
+        extension = RqExtension()
+        extension.run_task()
 
-        request = rf.get('/')
-        rq = RqExtension()
-
-        assert rq.check_service(request) is False
-
-    @mock.patch('livewatch.extensions.rq.django_rq.enqueue')
-    def test_check_service_timeout(self, service_mock, rf):
-        time = timezone.now() - timedelta(minutes=16)
-        cache.set('livewatch_watchdog', time, 2592000)
-
-        request = rf.get('/')
-        rq = RqExtension()
-
-        assert rq.check_service(request) is False
+        assert mock_task.call_count == 1

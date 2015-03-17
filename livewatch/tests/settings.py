@@ -24,6 +24,8 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
 
+    'celery',
+    'djcelery',
     'django_rq',
     'livewatch',
 )
@@ -40,3 +42,5 @@ RQ_QUEUES = {
         'DB': 0,
     }
 }
+
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
