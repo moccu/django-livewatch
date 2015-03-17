@@ -17,6 +17,6 @@ def livewatch_update_task():
         # livewatch view will check for this key, cache timeout: 30d
         cache.set('livewatch_watchdog', timezone.now(), 2592000)
         return True
-    except Exception:
-        logger.error('Livewatch task failed.', exc_info=True)
+    except Exception as exc:
+        logger.error('Livewatch task failed. Exception: {0}'.format(str(exc)))
         return False
