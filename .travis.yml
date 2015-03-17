@@ -25,3 +25,6 @@ after_success:
   - pip install "coveralls==0.4.1" coverage
   - coverage report
   - coveralls
+
+services:
+  - redis-server
