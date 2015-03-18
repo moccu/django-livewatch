@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import mock
 import pytest
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.core.cache import cache
 from django.utils import timezone
 
@@ -103,6 +103,13 @@ class TestRqExtension:
         extension.run_task()
 
         assert mock_task.call_count == 1
+
+    def test_livewatch_update_task(self):
+        from ..extensions.rq import livewatch_update_task
+
+        assert cache.get('livewatch_watchdog') is None
+        livewatch_update_task()
+        assert isinstance(cache.get('livewatch_watchdog'), datetime) is True
 
 
 class TestCeleryExtension:
