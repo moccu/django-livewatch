@@ -22,6 +22,8 @@ class LiveWatchView(View):
             retval = extensions[service].check_service(request)
             if not retval:
                 return HttpResponseNotFound()
+        elif service and service not in extensions:
+            return HttpResponseNotFound()
 
         if 'key' not in request.GET:
             return HttpResponse('Ok')

@@ -36,6 +36,13 @@ class TestLiveWatchView:
         assert response.status_code == 404
         assert response.content == b''
 
+    def test_get_service_not_in_extensions(self, client):
+        get_extensions(reload_extensions=True)
+        url = reverse('livewatch-service', kwargs={'service': 'foobar'})
+        response = client.get(url)
+        assert response.status_code == 404
+        assert response.content == b''
+
     @mock.patch('livewatch.extensions.rq.RqExtension.check_service')
     def test_get_service_rq(self, service_mock, client, settings):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
