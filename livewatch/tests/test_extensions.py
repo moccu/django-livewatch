@@ -9,8 +9,25 @@ from django.utils import timezone
 
 
 from ..extensions.base import BaseExtension, TaskExtension
+from ..extensions.celery import CeleryExtension
 from ..extensions.rq import RqExtension
-from .resources.mock import MockExtension, MockTaskExtension
+
+
+class MockExtension(BaseExtension):
+    name = 'mock_extension'
+
+    def check_service(self, request):
+        return 'mock check service'
+
+
+class MockTaskExtension(TaskExtension):
+    name = 'mock_task_extension'
+
+    def check_service(self, request):
+        return 'mock check service'
+
+    def run_task(self):
+        return 'mock run task'
 
 
 class TestBaseExtension:
@@ -83,6 +100,19 @@ class TestRqExtension:
     @mock.patch('livewatch.extensions.rq.django_rq.enqueue')
     def test_run_task(self, mock_task):
         extension = RqExtension()
+        extension.run_task()
+
+        assert mock_task.call_count == 1
+
+
+class TestCeleryExtension:
+
+    def setup(self):
+        cache.delete('livewatch_watchdog')
+
+    @mock.patch('livewatch.extensions.celery.livewatch_update_task.delay')
+    def test_run_task(self, mock_task):
+        extension = CeleryExtension()
         extension.run_task()
 
         assert mock_task.call_count == 1
