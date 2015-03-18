@@ -18,5 +18,9 @@ def livewatch_update_task():
         cache.set('livewatch_watchdog', timezone.now(), 2592000)
         return True
     except Exception as exc:
-        logger.error('Livewatch task failed. Exception: {0}'.format(str(exc)))
+        logger.error(
+            'Livewatch task failed. {0}: {1}'.format(
+                exc.__class__.__name__, exc)
+        )
+
         return False

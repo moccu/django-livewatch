@@ -18,12 +18,13 @@ class LiveWatchView(View):
         extensions = get_extensions()
 
         service = kwargs.get('service', None)
-        if service and service in extensions:
+        if service:
+            if service not in extensions:
+                return HttpResponseNotFound()
+
             retval = extensions[service].check_service(request)
             if not retval:
                 return HttpResponseNotFound()
-        elif service and service not in extensions:
-            return HttpResponseNotFound()
 
         if 'key' not in request.GET:
             return HttpResponse('Ok')
