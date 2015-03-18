@@ -11,6 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   extending_livewatch
+
 
 
 Indices and tables
