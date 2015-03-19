@@ -1,3 +1,5 @@
+.. _extending-livewatch:
+
 Extending Livewatch
 ===================
 
