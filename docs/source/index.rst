@@ -20,6 +20,15 @@ Usage
    usage
    extending_livewatch
    contribution
+   changelog
+
+Api documentation
+=================
+
+.. toctree::
+   :maxdepth: 2
+
+   modules/modules
 
 
 Indices and tables
