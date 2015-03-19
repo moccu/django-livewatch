@@ -25,4 +25,4 @@ If you use a task queue service like celery or rq you can inherit your custom cl
         name = 'bar'
 
         def run_task(self):
-            # execute the task
+            # check that execution of a task works

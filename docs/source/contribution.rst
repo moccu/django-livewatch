@@ -32,13 +32,13 @@ If you want to generate a coverage report, you can use the following command.
 
     $ make coverage
 
-or if you want to generate a html version of the coverage report, use the following command:
+Or if you want to generate a HTML version of the coverage report, use the following command.
 
 .. code-block:: bash
 
     $ make coverage-html
 
-the generated html files are located in the ``htmlcov`` folder.
+The generated HTML files are located in the ``htmlcov`` folder.
 
 Documentation
 `````````````
@@ -46,7 +46,7 @@ Documentation
 `django-livewatch` uses Sphinx for documentation. You find all the source files
 in the ``docs/source`` folder.
 
-To update/generate the html output of the documentation, use the following
+To update/generate the HTML output of the documentation, use the following
 command:
 
 .. code-block:: bash
