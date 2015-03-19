@@ -72,8 +72,8 @@ setup(
     install_requires=install_requirements,
     extras_require={
         'tests': test_requirements,
-        'rq': ['django-rq==0.7.0', 'redis==2.10.3'],
-        'celery': ['django-celery==3.1.16'],
+        'rq': ['django-rq'],
+        'celery': ['celery'],
     },
     include_package_data=True,
     license='Apache License (2.0)',
