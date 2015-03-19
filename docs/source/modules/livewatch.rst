@@ -11,14 +11,6 @@ Subpackages
 Submodules
 ----------
 
-livewatch.celery module
------------------------
-
-.. automodule:: livewatch.celery
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 livewatch.tasks module
 ----------------------
 
