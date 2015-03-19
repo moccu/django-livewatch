@@ -22,10 +22,8 @@ livewatch.tasks module
 livewatch.urls module
 ---------------------
 
-.. automodule:: livewatch.urls
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. literalinclude:: ../../../livewatch/urls.py
+   :lines: 8-
 
 livewatch.utils module
 ----------------------
