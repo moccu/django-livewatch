@@ -10,7 +10,8 @@ django-livewatch
 .. image:: https://readthedocs.org/projects/django-livewatch/badge/?version=latest
     :target: http://django-livewatch.readthedocs.org/en/latest/
 
-livewatch.de integration for django projects
+livewatch.de integration for django projects.
+
 
 Installation
 ============
@@ -38,6 +39,7 @@ Installation
         (r'^livewatch/', include('livewatch.urls')),
     )
 
+
 Usage
 =====
 
@@ -54,6 +56,7 @@ To integrate ``django-livewatch`` with `livewatch.de <http://www.livewatch.de/>`
 ... if you're using the rq extension:
 
 * /livewatch/rq/
+
 
 Resources
 =========
