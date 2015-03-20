@@ -9,7 +9,7 @@ Installation
 
     pip install django-livewatch
 
-* Add ``livewatch`` to ``INSTALLED_APPS`` in ``settings.py``:
+* If you use ``livewatch`` with ``celery`` add it to ``INSTALLED_APPS`` in ``settings.py``:
 
 .. code-block:: python
 
