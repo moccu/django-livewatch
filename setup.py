@@ -75,7 +75,7 @@ setup(
         'celery': ['celery'],
     },
     include_package_data=True,
-    license='Apache License (2.0)',
+    license='BSD',
     keywords=['livewatch', 'django'],
     classifiers=[
         'Development Status :: 4 - Beta',
