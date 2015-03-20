@@ -41,7 +41,7 @@ Installation
 Usage
 =====
 
-Before you can use django-livewatch, you have to install and configure it. Please see :ref:`installation` for more details.
+Before you can use django-livewatch, you have to install and configure it.
 
 To integrate ``django-livewatch`` with `livewatch.de <http://www.livewatch.de/>`_ you can use the following URLs:
 
