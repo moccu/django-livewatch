@@ -25,7 +25,7 @@ coverage-html:
 devinstall:
 	pip install -e .
 	pip install -e .[tests]
-	pip install -r requirements-docs.txt
+	pip install -r resources/requirements-docs.txt
 
 docs: clean-build
 	pip install -r resources/requirements-docs.txt
