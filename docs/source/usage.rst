@@ -7,6 +7,10 @@ To integrate ``django-livewatch`` with `livewatch.de <http://www.livewatch.de/>`
 
 * /livewatch/
 
+... if you're using the cache extension:
+
+* /livewatch/cache/
+
 ... if you're using the celery extension:
 
 * /livewatch/celery/
