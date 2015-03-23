@@ -9,6 +9,7 @@ from django.utils import timezone
 
 
 from ..extensions.base import BaseExtension, TaskExtension
+from ..extensions.cache import CacheExtension
 from ..extensions.celery import CeleryExtension
 from ..extensions.rq import RqExtension
 
@@ -88,6 +89,30 @@ class TestTaskExtension:
 
         request = rf.get('/')
         extension = TaskExtension()
+
+        assert extension.check_service(request) is False
+
+
+class TestCacheExtension:
+
+    def setup(self):
+        cache.delete('livewatch_watchdog')
+
+    @mock.patch('livewatch.extensions.cache.cache.get')
+    def test_check_service(self, mock_cache, rf):
+        mock_cache.return_value = 'cache_activated'
+
+        request = rf.get('/')
+        extension = CacheExtension()
+
+        assert extension.check_service(request) is True
+
+    @mock.patch('livewatch.extensions.cache.cache.get')
+    def test_check_service_cache_none(self, mock_cache, rf):
+        mock_cache.return_value = None
+
+        request = rf.get('/')
+        extension = CacheExtension()
 
         assert extension.check_service(request) is False
 
