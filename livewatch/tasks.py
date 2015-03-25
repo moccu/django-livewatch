@@ -7,5 +7,5 @@ from celery import shared_task
 
 
 @shared_task
-def livewatch_update_task():
-    return cache.set('livewatch_watchdog', timezone.now(), 2592000)
+def livewatch_update_task(key):
+    return cache.set(key, timezone.now(), 2592000)

@@ -7,12 +7,13 @@ from django.utils import timezone
 from .base import TaskExtension
 
 
-def livewatch_update_task():
-    return cache.set('livewatch_watchdog', timezone.now(), 2592000)
+def livewatch_update_task(key):
+    return cache.set(key, timezone.now(), 2592000)
 
 
 class RqExtension(TaskExtension):
     name = 'rq'
 
     def run_task(self):
-        django_rq.enqueue(livewatch_update_task)
+        key = 'livewatch_{0}'.format(self.name)
+        django_rq.enqueue(livewatch_update_task, key)

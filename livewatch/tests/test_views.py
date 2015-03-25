@@ -1,15 +1,42 @@
 from __future__ import absolute_import
 
-import mock
-import pytest
+import time
 
+import django_rq
+import pytest
+from django.core.cache import cache, caches
 from django.core.urlresolvers import reverse
 
+from .celery import celery
 from ..utils import get_extensions
 
 
 @pytest.mark.django_db
 class TestLiveWatchView:
+
+    def setup(self):
+        # Reset django cache caching :-D
+        caches._caches.caches = {}
+
+    def teardown(self):
+        # Let all running tasks finish...
+        time.sleep(1)
+
+        # Purge celery queue...
+        celery.control.purge()
+
+        # Let the worker run in burst mode to clear the queue
+        worker = django_rq.get_worker()
+        worker.work(burst=True)
+
+        # Let the worker finish...
+        time.sleep(1)
+
+        cache.delete('livewatch_cache')
+        cache.delete('livewatch_rq')
+        cache.delete('livewatch_celery')
+        # Reset django cache caching :-D
+        caches._caches.caches = {}
 
     def test_url(self):
         assert '/' == reverse('livewatch')
@@ -43,66 +70,74 @@ class TestLiveWatchView:
         assert response.status_code == 404
         assert response.content == b''
 
-    @mock.patch('livewatch.extensions.cache.CacheExtension.check_service')
-    def test_get_service_cache(self, service_mock, client, settings):
+    def test_get_service_cache(self, client, settings):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.cache:CacheExtension']
         get_extensions(reload_extensions=True)
-        service_mock.return_value = True
 
         url = reverse('livewatch-service', kwargs={'service': 'cache'})
         response = client.get(url)
         assert response.status_code == 200
         assert response.content == b'Ok'
 
-    @mock.patch('livewatch.extensions.cache.CacheExtension.check_service')
-    def test_get_service_cache_error(self, service_mock, client, settings):
+    def test_get_service_cache_error(self, client, settings):
+        settings.CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            }
+        }
+
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.cache:CacheExtension']
         get_extensions(reload_extensions=True)
-        service_mock.return_value = False
 
         url = reverse('livewatch-service', kwargs={'service': 'cache'})
         response = client.get(url)
         assert response.status_code == 404
         assert response.content == b''
 
-    @mock.patch('livewatch.extensions.rq.RqExtension.check_service')
-    def test_get_service_rq(self, service_mock, client, settings):
+    def test_get_service_rq(self, client, settings, rq_worker):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
         get_extensions(reload_extensions=True)
-        service_mock.return_value = True
 
         url = reverse('livewatch-service', kwargs={'service': 'rq'})
         response = client.get(url)
+
+        assert response.status_code == 404
+        assert response.content == b''
+
+        time.sleep(1)
+        response = client.get(url)
+
         assert response.status_code == 200
         assert response.content == b'Ok'
 
-    @mock.patch('livewatch.extensions.rq.RqExtension.check_service')
-    def test_get_service_rq_error(self, service_mock, client, settings):
+    def test_get_service_rq_error(self, client, settings):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
         get_extensions(reload_extensions=True)
-        service_mock.return_value = False
 
         url = reverse('livewatch-service', kwargs={'service': 'rq'})
         response = client.get(url)
         assert response.status_code == 404
         assert response.content == b''
 
-    @mock.patch('livewatch.extensions.celery.CeleryExtension.check_service')
-    def test_get_service_celery(self, service_mock, client, settings):
+    def test_get_service_celery(self, client, settings, celery_worker):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.celery:CeleryExtension']
         get_extensions(reload_extensions=True)
-        service_mock.return_value = True
 
         url = reverse('livewatch-service', kwargs={'service': 'celery'})
         response = client.get(url)
+
+        assert response.status_code == 404
+        assert response.content == b''
+
+        time.sleep(1)
+        response = client.get(url)
+
         assert response.status_code == 200
         assert response.content == b'Ok'
 
-    @mock.patch('livewatch.extensions.celery.CeleryExtension.check_service')
-    def test_get_service_celery_error(self, service_mock, client, settings):
+    def test_get_service_celery_error(self, client, settings):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.celery:CeleryExtension']
         get_extensions(reload_extensions=True)
-        service_mock.return_value = False
 
         url = reverse('livewatch-service', kwargs={'service': 'celery'})
         response = client.get(url)

@@ -8,4 +8,5 @@ class CeleryExtension(TaskExtension):
     name = 'celery'
 
     def run_task(self):
-        livewatch_update_task.delay()
+        key = 'livewatch_{0}'.format(self.name)
+        livewatch_update_task.delay(key)

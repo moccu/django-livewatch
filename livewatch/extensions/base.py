@@ -15,10 +15,13 @@ class BaseExtension(object):
 
 
 class TaskExtension(BaseExtension):
+    name = 'taskextension'
 
     def check_service(self, request):
+        key = 'livewatch_{0}'.format(self.name)
         self.run_task()
-        watchdog_timestamp = cache.get('livewatch_watchdog')
+
+        watchdog_timestamp = cache.get(key)
         if watchdog_timestamp is None:
             return False
 

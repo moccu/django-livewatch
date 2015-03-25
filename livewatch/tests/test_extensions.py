@@ -1,13 +1,15 @@
 from __future__ import absolute_import
 
+import time
+from datetime import timedelta
+
 import mock
 import pytest
-
-from datetime import timedelta, datetime
-from django.core.cache import cache
+import django_rq
+from django.core.cache import cache, caches
 from django.utils import timezone
 
-
+from .celery import celery
 from ..extensions.base import BaseExtension, TaskExtension
 from ..extensions.cache import CacheExtension
 from ..extensions.celery import CeleryExtension
@@ -23,9 +25,6 @@ class MockExtension(BaseExtension):
 
 class MockTaskExtension(TaskExtension):
     name = 'mock_task_extension'
-
-    def check_service(self, request):
-        return 'mock check service'
 
     def run_task(self):
         return 'mock run task'
@@ -50,7 +49,11 @@ class TestBaseExtension:
 class TestTaskExtension:
 
     def setup(self):
-        cache.delete('livewatch_watchdog')
+        self.key = 'livewatch_mock_task_extension'
+        cache.delete(self.key)
+
+    def teardown(self):
+        cache.delete(self.key)
 
     def test_run_task(self):
         extension = MockTaskExtension()
@@ -63,32 +66,27 @@ class TestTaskExtension:
         with pytest.raises(NotImplementedError):
             extension.run_task()
 
-    @mock.patch('livewatch.extensions.base.TaskExtension.run_task')
-    def test_check_service(self, run_task_mock, rf):
+    def test_check_service(self, rf):
         time = timezone.now() - timedelta(minutes=5)
-        cache.set('livewatch_watchdog', time, 2592000)
+        cache.set(self.key, time, 2592000)
 
         request = rf.get('/')
-        extension = TaskExtension()
+        extension = MockTaskExtension()
 
         assert extension.check_service(request) is True
 
-    @mock.patch('livewatch.extensions.base.TaskExtension.run_task')
-    def test_check_service_cache_none(self, run_task_mock, rf):
-        run_task_mock.return_value = None
-
+    def test_check_service_not_in_cache(self, rf):
         request = rf.get('/')
-        extension = TaskExtension()
+        extension = MockTaskExtension()
 
         assert extension.check_service(request) is False
 
-    @mock.patch('livewatch.extensions.base.TaskExtension.run_task')
-    def test_check_service_timeout(self, run_task_mock, rf):
+    def test_check_service_timeout(self, rf):
         time = timezone.now() - timedelta(minutes=16)
-        cache.set('livewatch_watchdog', time, 2592000)
+        cache.set(self.key, time, 2592000)
 
         request = rf.get('/')
-        extension = TaskExtension()
+        extension = MockTaskExtension()
 
         assert extension.check_service(request) is False
 
@@ -96,55 +94,120 @@ class TestTaskExtension:
 class TestCacheExtension:
 
     def setup(self):
-        cache.delete('livewatch_watchdog')
+        self.key = 'livewatch_cache'
 
-    @mock.patch('livewatch.extensions.cache.cache.get')
-    def test_check_service(self, mock_cache, rf):
-        mock_cache.return_value = 'cache_activated'
+    def teardown(self):
+        cache.delete(self.key)
 
-        request = rf.get('/')
+    def test_check_service(self):
         extension = CacheExtension()
 
-        assert extension.check_service(request) is True
+        assert extension.check_service() is True
 
     @mock.patch('livewatch.extensions.cache.cache.get')
-    def test_check_service_cache_none(self, mock_cache, rf):
-        mock_cache.return_value = None
+    def test_check_service_not_active(self, cache_mock):
+        cache_mock.return_value = None
 
-        request = rf.get('/')
         extension = CacheExtension()
 
-        assert extension.check_service(request) is False
+        assert extension.check_service() is False
+
+    def test_check_service_cache_deleted_after_check(self):
+        extension = CacheExtension()
+
+        assert extension.check_service() is True
+        assert cache.get(self.key) is None
 
 
 class TestRqExtension:
 
     def setup(self):
-        cache.delete('livewatch_watchdog')
+        self.key = 'livewatch_rq'
+        # cache.delete(self.key)
+        # Reset django cache caching :-D
+        caches._caches.caches = {}
 
-    @mock.patch('livewatch.extensions.rq.django_rq.enqueue')
-    def test_run_task(self, mock_task):
+    def teardown(self):
+        # Let all running tasks finish...
+        time.sleep(1)
+
+        # Let the worker run in burst mode to clear the queue
+        worker = django_rq.get_worker()
+        worker.work(burst=True)
+
+        # Let the worker finish...
+        time.sleep(1)
+
+        # Cleanup cache key used in tests
+        cache.delete(self.key)
+
+        # Reset django cache caching :-D
+        caches._caches.caches = {}
+
+    def test_check_service(self, rf, rq_worker):
+        request = rf.get('/')
         extension = RqExtension()
-        extension.run_task()
 
-        assert mock_task.call_count == 1
+        assert extension.check_service(request) is False
+        time.sleep(1)
+        assert extension.check_service(request) is True
+
+    def test_check_service_not_in_cache(self, rf):
+        request = rf.get('/')
+        extension = RqExtension()
+
+        assert extension.check_service(request) is False
+        assert extension.check_service(request) is False
 
     def test_livewatch_update_task(self):
         from ..extensions.rq import livewatch_update_task
 
-        assert cache.get('livewatch_watchdog') is None
-        livewatch_update_task()
-        assert isinstance(cache.get('livewatch_watchdog'), datetime) is True
+        assert cache.get(self.key) is None
+        livewatch_update_task(self.key)
+        assert cache.get(self.key) is not None
+
+    def test_livewatch_update_task_cache_not_set(self, settings):
+        settings.CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            }
+        }
+
+        from ..extensions.rq import livewatch_update_task
+
+        assert cache.get(self.key) is None
+        livewatch_update_task(self.key)
+        assert cache.get(self.key) is None
 
 
 class TestCeleryExtension:
 
     def setup(self):
-        cache.delete('livewatch_watchdog')
+        self.key = 'livewatch_celery'
 
-    @mock.patch('livewatch.extensions.celery.livewatch_update_task.delay')
-    def test_run_task(self, mock_task):
+    def teardown(self):
+        # Let all running tasks finish...
+        time.sleep(1)
+
+        # Purge celery queue...
+        celery.control.purge()
+
+        # Let the worker finish...
+        time.sleep(1)
+
+        cache.delete(self.key)
+
+    def test_check_service(self, rf, celery_worker):
+        request = rf.get('/')
         extension = CeleryExtension()
-        extension.run_task()
 
-        assert mock_task.call_count == 1
+        assert extension.check_service(request) is False
+        time.sleep(1)
+        assert extension.check_service(request) is True
+
+    def test_check_service_not_in_cache(self, rf):
+        request = rf.get('/')
+        extension = CeleryExtension()
+
+        assert extension.check_service(request) is False
+        assert extension.check_service(request) is False
