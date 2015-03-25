@@ -49,10 +49,12 @@ test_requirements = [
     'coverage==3.7.1',
     'execnet==1.3.0',
     'pep8==1.6.2',
-    'mock==1.0.1',
     'factory-boy==2.4.1',
+    'mock==1.0.1',
     'celery==3.1.16',
     'django-rq==0.7.0',
+    'django-redis-cache==0.13.0',
+    'hiredis==0.1.6',
 ]
 
 
