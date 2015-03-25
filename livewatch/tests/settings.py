@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+
 SECRET_KEY = 'test'
 
 ROOT_URLCONF = 'livewatch.urls'
@@ -28,3 +31,23 @@ RQ_QUEUES = {
         'DB': 0,
     }
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': 'localhost:6379',
+        'OPTIONS': {
+            'DB': 0,
+            'PARSER_CLASS': 'redis.connection.HiredisParser',
+            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
+            'CONNECTION_POOL_CLASS_KWARGS': {
+                'max_connections': 50,
+                'timeout': 20,
+            }
+        },
+    },
+}
+
+# We create a celery instance that the shared task gets binded
+# to a celery app configured with redis_cache
+from . import celery  # NOQA
