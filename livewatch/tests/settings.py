@@ -28,7 +28,7 @@ RQ_QUEUES = {
     'default': {
         'HOST': 'localhost',
         'PORT': 6379,
-        'DB': 0,
+        'DB': 1,
     }
 }
 
@@ -40,10 +40,6 @@ CACHES = {
             'DB': 0,
             'PARSER_CLASS': 'redis.connection.HiredisParser',
             'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
-            'CONNECTION_POOL_CLASS_KWARGS': {
-                'max_connections': 50,
-                'timeout': 20,
-            }
         },
     },
 }
