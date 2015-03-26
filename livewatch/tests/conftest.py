@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import pytest
 import time
 
@@ -24,13 +26,9 @@ def celery_worker(request):
 
     from multiprocessing import Process
 
-    celery_args = ['-C', '-q', '-c', '1', '-P', 'solo', '--without-gossip']
+    celery_args = ['-C', '-q', '-c', '1', '-P', 'solo', '--without-gossip', '--loglevel=fatal']
     proc = Process(target=lambda: celery.worker_main(celery_args))
 
-    def cleanup():
-        proc.terminate()
-
-    request.addfinalizer(cleanup)
     proc.start()
 
     # Wait for worker to finish initializing to avoid a race condition I've been experiencing.
@@ -62,10 +60,6 @@ def rq_worker(request):
         'env': {'DJANGO_SETTINGS_MODULE': 'livewatch.tests.settings'}
     })
 
-    def cleanup():
-        proc.terminate()
-
-    request.addfinalizer(cleanup)
     proc.start()
 
     time.sleep(1)
