@@ -64,3 +64,11 @@ texinfo_documents = [
    u'Moccu GmbH & Co. KG', 'livewatch', 'One line description of project.',
    'Miscellaneous'),
 ]
+
+intersphinx_mapping = {
+    'python': ('http://docs.python.org/', None),
+    'django': (
+        'http://docs.djangoproject.com/en/dev/',
+        'http://docs.djangoproject.com/en/dev/_objects/'
+    ),
+}
