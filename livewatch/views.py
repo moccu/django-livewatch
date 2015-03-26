@@ -11,6 +11,8 @@ from .utils import get_extensions
 
 logger = logging.getLogger(__name__)
 
+KEY_RE = re.compile(r'^[a-f0-9]{32}$')
+
 
 class LiveWatchView(View):
 
@@ -29,7 +31,7 @@ class LiveWatchView(View):
         if 'key' not in request.GET:
             return HttpResponse('Ok')
 
-        if re.match(r'^[a-f0-9]{32}$', request.GET['key']):
+        if KEY_RE.match(request.GET['key']):
             return HttpResponse(request.GET['key'])
 
         return HttpResponseNotFound()
