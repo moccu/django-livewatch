@@ -3,8 +3,10 @@ from __future__ import absolute_import
 import time
 
 import django_rq
+import mock
 import pytest
-from django.core.cache import cache, caches
+from django.core.cache import cache
+
 from django.core.urlresolvers import reverse
 
 from .celery import celery
@@ -13,10 +15,6 @@ from ..utils import get_extensions
 
 @pytest.mark.django_db
 class TestLiveWatchView:
-
-    def setup(self):
-        # Reset django cache caching :-D
-        caches._caches.caches = {}
 
     def teardown(self):
         # Let all running tasks finish...
@@ -35,13 +33,11 @@ class TestLiveWatchView:
         cache.delete('livewatch_cache')
         cache.delete('livewatch_rq')
         cache.delete('livewatch_celery')
-        # Reset django cache caching :-D
-        caches._caches.caches = {}
 
     def test_url(self):
         assert '/' == reverse('livewatch')
 
-    def test_url_service(self, settings):
+    def test_url_service(self):
         expected_url = reverse('livewatch-service', kwargs={'service': 'testservice'})
         assert '/testservice/' == expected_url
 
@@ -79,13 +75,8 @@ class TestLiveWatchView:
         assert response.status_code == 200
         assert response.content == b'Ok'
 
-    def test_get_service_cache_error(self, client, settings):
-        settings.CACHES = {
-            'default': {
-                'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-            }
-        }
-
+    @mock.patch('livewatch.extensions.cache.cache.set')
+    def test_get_service_cache_error(self, cache_mock, client, settings):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.cache:CacheExtension']
         get_extensions(reload_extensions=True)
 
