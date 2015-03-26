@@ -7,6 +7,10 @@ django-livewatch
 .. image:: https://travis-ci.org/moccu/django-livewatch.png?branch=master
     :target: https://travis-ci.org/moccu/django-livewatch
 
+
+.. image:: https://coveralls.io/repos/moccu/django-livewatch/badge.svg
+    :target: https://coveralls.io/r/moccu/django-livewatch
+
 .. image:: https://readthedocs.org/projects/django-livewatch/badge/?version=latest
     :target: http://django-livewatch.readthedocs.org/en/latest/
 
