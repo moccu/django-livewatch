@@ -14,12 +14,7 @@ class CacheExtension(BaseExtension):
         key = 'livewatch_{0}'.format(self.name)
         cache.set(key, 'cache_activated', 2592000)
 
-        watchdog = cache.get(key)
-        cache_activated = False
-
-        if watchdog == 'cache_activated':
-            cache_activated = True
-
+        cache_activated = cache.get(key) == 'cache_activated'
         cache.delete(key)
 
         return cache_activated
