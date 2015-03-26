@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 
-from django.test.utils import patch_logger
+try:
+    from django.test.utils import patch_logger
+except ImportError:
+    from .utils import patch_logger
 
 from ..extensions.rq import RqExtension
 from ..utils import get_extensions
