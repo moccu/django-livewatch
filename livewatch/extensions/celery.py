@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from .base import TaskExtension
-from ..tasks import livewatch_update_task
+from ..tasks import livewatch_update_celery_task
 
 
 class CeleryExtension(TaskExtension):
@@ -9,4 +9,4 @@ class CeleryExtension(TaskExtension):
 
     def run_task(self):
         key = 'livewatch_{0}'.format(self.name)
-        livewatch_update_task.delay(key)
+        livewatch_update_celery_task.delay(key)
