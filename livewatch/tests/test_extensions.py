@@ -140,6 +140,12 @@ class TestCeleryExtension:
     key = 'livewatch_celery'
 
     def setup(self):
+        # Purge celery queue...
+        celery.control.purge()
+
+        # Let the worker finish...
+        time.sleep(1)
+
         cache.delete(self.key)
 
     def teardown(self):
