@@ -27,7 +27,7 @@ install_requirements = [
 ]
 
 
-if sys.version_info < (2, 7):
+if sys.version_info[:2] < (2, 7):
     # `rq` requires importlib
     install_requirements.extend([
         'importlib',
