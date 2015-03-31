@@ -4,7 +4,7 @@ django-livewatch
 .. image:: https://badge.fury.io/py/django-livewatch.png
     :target: http://badge.fury.io/py/django-livewatch
 
-.. image:: https://travis-ci.org/moccu/django-livewatch.png?branch=master
+.. image:: https://travis-ci.org/moccu/django-livewatch.svg
     :target: https://travis-ci.org/moccu/django-livewatch
 
 .. image:: https://coveralls.io/repos/moccu/django-livewatch/badge.svg?branch=master
