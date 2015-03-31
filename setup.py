@@ -27,15 +27,6 @@ install_requirements = [
 ]
 
 
-if sys.version_info[:2] < (2, 7):
-    # `rq` requires importlib
-    install_requirements.extend([
-        'importlib',
-        'unittest2',
-        'argparse'
-    ])
-
-
 test_requirements = [
     'py==1.4.26',
     'pyflakes==0.8.1',
@@ -75,6 +66,7 @@ setup(
         'tests': test_requirements,
         'rq': ['django-rq'],
         'celery': ['celery'],
+        ':python_version=="2.6"': ['importlib', 'unittest2', 'argparse'],
     },
     include_package_data=True,
     license='BSD',
