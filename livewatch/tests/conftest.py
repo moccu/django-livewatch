@@ -62,7 +62,7 @@ def rq_worker(request):
 
     proc.start()
 
-    time.sleep(1)
+    time.sleep(5)
 
     yield proc
 
