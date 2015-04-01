@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.2.4 2015-04-01
+----------------
+
+* Main URL for checking all services at the same time
+
 0.2.3 2015-03-31
 ----------------
 
