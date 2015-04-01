@@ -31,3 +31,4 @@ def test_get_extensions_error(settings):
 def test_get_extensions_hasattr_cache(settings):
     get_extensions._cache = 'foobar'
     assert get_extensions() == 'foobar'
+    del get_extensions._cache

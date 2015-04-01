@@ -59,7 +59,8 @@ class TestLiveWatchView:
         assert response.status_code == 404
         assert response.content == b''
 
-    def test_get_service_not_in_extensions(self, client):
+    def test_get_service_not_in_extensions(self, client, settings):
+        settings.LIVEWATCH_EXTENSIONS = []
         get_extensions(reload_extensions=True)
         url = reverse('livewatch-service', kwargs={'service': 'foobar'})
         response = client.get(url)
@@ -83,7 +84,7 @@ class TestLiveWatchView:
         url = reverse('livewatch-service', kwargs={'service': 'cache'})
         response = client.get(url)
         assert response.status_code == 404
-        assert response.content == b''
+        assert response.content == b'Error cache'
 
     def test_get_service_rq(self, client, settings, rq_worker):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.rq:RqExtension']
@@ -93,7 +94,7 @@ class TestLiveWatchView:
         response = client.get(url)
 
         assert response.status_code == 404
-        assert response.content == b''
+        assert response.content == b'Error rq'
 
         time.sleep(1)
         response = client.get(url)
@@ -108,7 +109,7 @@ class TestLiveWatchView:
         url = reverse('livewatch-service', kwargs={'service': 'rq'})
         response = client.get(url)
         assert response.status_code == 404
-        assert response.content == b''
+        assert response.content == b'Error rq'
 
     def test_get_service_celery(self, client, settings, celery_worker):
         settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.celery:CeleryExtension']
@@ -118,7 +119,7 @@ class TestLiveWatchView:
         response = client.get(url)
 
         assert response.status_code == 404
-        assert response.content == b''
+        assert response.content == b'Error celery'
 
         time.sleep(1)
         response = client.get(url)
@@ -133,4 +134,35 @@ class TestLiveWatchView:
         url = reverse('livewatch-service', kwargs={'service': 'celery'})
         response = client.get(url)
         assert response.status_code == 404
-        assert response.content == b''
+        assert response.content == b'Error celery'
+
+    def test_get_services(self, client, settings, celery_worker):
+        settings.LIVEWATCH_EXTENSIONS = [
+            'livewatch.extensions.cache:CacheExtension',
+            'livewatch.extensions.celery:CeleryExtension',
+        ]
+        get_extensions(reload_extensions=True)
+
+        url = reverse('livewatch')
+        response = client.get(url)
+
+        assert response.status_code == 404
+
+        time.sleep(1)
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.content == b'Ok'
+
+    @mock.patch('livewatch.extensions.cache.cache.set')
+    def test_get_services_failed(self, cache_mock, client, settings):
+        settings.LIVEWATCH_EXTENSIONS = [
+            'livewatch.extensions.cache:CacheExtension',
+            'livewatch.extensions.celery:CeleryExtension',
+        ]
+        get_extensions(reload_extensions=True)
+
+        url = reverse('livewatch')
+        response = client.get(url)
+        assert response.status_code == 404
+        assert response.content == b'Error cache, celery'
