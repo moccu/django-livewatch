@@ -34,6 +34,12 @@ Make sure that you have ``celery`` installed. You can use the ``celery`` extra t
         'livewatch.extensions.rq:CeleryExtension',
     )
 
+    # Activate livewatch.tasks
+    CELERY_IMPORTS = (
+        'livewatch.tasks',
+    )
+
+
 django-rq
 `````````
 
