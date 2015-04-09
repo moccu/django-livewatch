@@ -49,6 +49,24 @@ test_requirements = [
 ]
 
 
+# sdist
+if not 'bdist_wheel' in sys.argv:
+    try:
+        import importlib
+    except ImportError:
+        install_requirements.append('importlib>=1.0.3')
+
+
+# bdist_wheel
+extras_require = {
+    # http://wheel.readthedocs.org/en/latest/#defining-conditional-dependencies
+    ':python_version=="2.6"': ['importlib>=1.0.3'],
+    'tests': test_requirements,
+    'rq': ['django-rq'],
+    'celery': ['celery'],
+}
+
+
 setup(
     name='django-livewatch',
     version=version,
@@ -62,12 +80,7 @@ setup(
         'livewatch.tests',
     ]),
     install_requires=install_requirements,
-    extras_require={
-        'tests': test_requirements,
-        'rq': ['django-rq'],
-        'celery': ['celery'],
-        ':python_version=="2.6"': ['importlib', 'unittest2', 'argparse'],
-    },
+    extras_require=extras_require,
     include_package_data=True,
     license='BSD',
     keywords=['livewatch', 'django'],
