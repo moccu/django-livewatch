@@ -34,7 +34,8 @@ Make sure that you have ``celery`` installed. You can use the ``celery`` extra t
         'livewatch.extensions.rq:CeleryExtension',
     )
 
-Celery has to be configured in a celery.py module that defines the instance. For more details see the official `celery documentation <http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html>`_.
+Celery has to be configured in a celery.py module that defines the instance. For more details see the
+official :ref:`celery documentation <celery:django-first-steps>`.
 The important part of the celery.py is:
 
 .. code-block:: python
