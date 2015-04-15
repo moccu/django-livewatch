@@ -34,6 +34,18 @@ Make sure that you have ``celery`` installed. You can use the ``celery`` extra t
         'livewatch.extensions.rq:CeleryExtension',
     )
 
+Celery has to be configured in a celery.py module that defines the instance. For more details see the official `celery documentation <http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html>`_.
+The important part of the celery.py is:
+
+.. code-block:: python
+
+    app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+If you don´t use the `autodiscover_tasks` setting, you have to import the celery shared task from livewatch.
+
+.. code-block:: python
+
+    # In settings.py
     # Activate livewatch.tasks
     CELERY_IMPORTS = (
         'livewatch.tasks',
