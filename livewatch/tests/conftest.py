@@ -41,7 +41,7 @@ def celery_worker(request):
 
     proc.terminate()
 
-    time.sleep(5)
+    time.sleep(1)
 
 
 @pytest.yield_fixture
