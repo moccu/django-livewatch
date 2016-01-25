@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3.0 2016-01-25
+----------------
+
+* Added logging if services/checks fail
+* Added support for Django 1.8 and 1.9 (actually just enabling tests)
+
+
 0.2.5 2015-04-09
 ----------------
 
