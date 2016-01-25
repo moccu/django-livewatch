@@ -7,6 +7,8 @@ python:
   - '3.4'
 
 env:
+  - DJANGO_VERSION=1.9.x
+  - DJANGO_VERSION=1.8.x
   - DJANGO_VERSION=1.7.x
   - DJANGO_VERSION=1.6.x
 
@@ -14,6 +16,10 @@ matrix:
   exclude:
   - python: '2.6'
     env: DJANGO_VERSION=1.7.x
+  - python: '2.6'
+    env: DJANGO_VERSION=1.8.x
+  - python: '2.6'
+    env: DJANGO_VERSION=1.9.x
 
 install:
   - pip install tox
@@ -22,7 +28,7 @@ script:
   - tox -e "$TRAVIS_PYTHON_VERSION-$DJANGO_VERSION"
 
 after_success:
-  - pip install "coveralls==0.4.1" coverage
+  - pip install "coveralls==1.1" coverage
   - coverage report
   - coveralls
 

@@ -28,6 +28,8 @@ install_requirements = [
 
 
 test_requirements = [
+    'tox',
+    'tox-pyenv',
     'py==1.4.26',
     'pyflakes==0.8.1',
     'pytest==2.6.4',
@@ -44,7 +46,7 @@ test_requirements = [
     'mock==1.0.1',
     'celery==3.1.16',
     'django-rq==0.7.0',
-    'django-redis-cache==0.13.0',
+    'django-redis-cache==1.6.4',
     'hiredis==0.1.6',
 ]
 
