@@ -21,7 +21,7 @@ def test_get_extensions(settings):
 def test_get_extensions_error(settings):
     settings.LIVEWATCH_EXTENSIONS = ['livewatch.extensions.foo:BarExtension']
 
-    with patch_logger('livewatch.utils', 'error') as calls:
+    with patch_logger('livewatch', 'error') as calls:
         get_extensions(reload_extensions=True)
 
         assert len(calls) == 1

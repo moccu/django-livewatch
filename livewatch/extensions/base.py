@@ -1,10 +1,5 @@
-import logging
-
 from django.core.cache import cache
 from django.utils import timezone
-
-
-logger = logging.getLogger(__name__)
 
 
 class BaseExtension(object):

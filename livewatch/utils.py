@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('livewatch')
 
 
 def get_extensions(reload_extensions=False):

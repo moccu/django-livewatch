@@ -9,7 +9,7 @@ from django.views.generic import View
 from .utils import get_extensions
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('livewatch')
 
 KEY_RE = re.compile(r'^[a-f0-9]{32}$')
 
@@ -33,7 +33,9 @@ class LiveWatchView(View):
                     services_failed.append(service)
 
         if services_failed:
-            return HttpResponseNotFound('Error {0}'.format(', '.join(sorted(services_failed))))
+            services_failed_text = ', '.join(sorted(services_failed))
+            logger.error('Service failed: {0}'.format(services_failed_text))
+            return HttpResponseNotFound('Error {0}'.format(services_failed_text))
 
         if 'key' not in request.GET:
             return HttpResponse('Ok')

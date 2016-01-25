@@ -1,10 +1,6 @@
-import logging
-
 from django.core.cache import cache
 
 from .base import BaseExtension
-
-logger = logging.getLogger(__name__)
 
 
 class CacheExtension(BaseExtension):
