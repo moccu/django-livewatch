@@ -14,9 +14,12 @@ class TaskExtension(BaseExtension):
 
     def check_service(self, request):
         key = 'livewatch_{0}'.format(self.name)
+
+        # Fetch timestamp before inserting task.
+        watchdog_timestamp = cache.get(key)
+
         self.run_task()
 
-        watchdog_timestamp = cache.get(key)
         if watchdog_timestamp is None:
             return False
 

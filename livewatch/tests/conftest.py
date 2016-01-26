@@ -52,7 +52,7 @@ def celery_worker(request):
     yield proc
 
     proc.terminate()
-    proc.join(5)
+    proc.join(10)
 
     celery.control.purge()
 
@@ -85,6 +85,6 @@ def rq_worker(request):
 
     # Wait for rq to exit, timeout 5 seconds.
     proc.terminate()
-    proc.join(5)
+    proc.join(10)
 
     [queue.empty() for queue in django_rq.get_worker().queues]
