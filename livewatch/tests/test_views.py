@@ -2,37 +2,20 @@ from __future__ import absolute_import
 
 import time
 
-import django_rq
 import mock
 import pytest
-from django.core.cache import cache
 
 from django.core.urlresolvers import reverse
 
-from .celery import celery
 from ..utils import get_extensions
 
 
 @pytest.mark.django_db
 class TestLiveWatchView:
 
-    def teardown(self):
-        # Let all running tasks finish...
-        time.sleep(1)
-
-        # Purge celery queue...
-        celery.control.purge()
-
-        # Let the worker run in burst mode to clear the queue
-        worker = django_rq.get_worker()
-        worker.work(burst=True)
-
-        # Let the worker finish...
-        time.sleep(1)
-
-        cache.delete('livewatch_cache')
-        cache.delete('livewatch_rq')
-        cache.delete('livewatch_celery')
+    @pytest.fixture(autouse=True)
+    def setup(self, cleared_cache):
+        pass
 
     def test_url(self):
         assert '/' == reverse('livewatch')

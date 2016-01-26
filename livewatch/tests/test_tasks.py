@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import time
 from datetime import datetime
 
 import mock
@@ -14,7 +13,6 @@ class TestRqTask:
     key = 'livewatch_rq'
 
     def teardown(self):
-        time.sleep(1)
         cache.delete(self.key)
 
     def test_livewatch_update_rq_task(self):
@@ -33,7 +31,6 @@ class TestCeleryTask:
     key = 'livewatch_task'
 
     def teardown(self):
-        time.sleep(1)
         cache.delete(self.key)
 
     def test_livewatch_update_celery_task(self):

@@ -5,12 +5,9 @@ from datetime import timedelta
 
 import mock
 import pytest
-import django_rq
-from django.core.cache import cache
 
 from django.utils import timezone
 
-from .celery import celery
 from ..extensions.base import BaseExtension, TaskExtension
 from ..extensions.cache import CacheExtension
 from ..extensions.celery import CeleryExtension
@@ -37,21 +34,15 @@ class TestBaseExtension:
 class TestTaskExtension:
     key = 'livewatch_mock_task_extension'
 
-    def setup(self):
-        cache.delete(self.key)
-
-    def teardown(self):
-        cache.delete(self.key)
-
     def test_run_task_not_implemented(self):
         extension = TaskExtension()
 
         with pytest.raises(NotImplementedError):
             extension.run_task()
 
-    def test_check_service(self, rf):
+    def test_check_service(self, cleared_cache, rf):
         time = timezone.now() - timedelta(minutes=5)
-        cache.set(self.key, time, 2592000)
+        cleared_cache.set(self.key, time, 2592000)
 
         request = rf.get('/')
         extension = MockTaskExtension()
@@ -64,9 +55,9 @@ class TestTaskExtension:
 
         assert extension.check_service(request) is False
 
-    def test_check_service_timeout(self, rf):
+    def test_check_service_timeout(self, cleared_cache, rf):
         time = timezone.now() - timedelta(minutes=16)
-        cache.set(self.key, time, 2592000)
+        cleared_cache.set(self.key, time, 2592000)
 
         request = rf.get('/')
         extension = MockTaskExtension()
@@ -76,12 +67,6 @@ class TestTaskExtension:
 
 class TestCacheExtension:
     key = 'livewatch_cache'
-
-    def setup(self):
-        cache.delete(self.key)
-
-    def teardown(self):
-        cache.delete(self.key)
 
     def test_check_service(self):
         extension = CacheExtension()
@@ -93,34 +78,17 @@ class TestCacheExtension:
         extension = CacheExtension()
         assert extension.check_service() is False
 
-    def test_check_service_cache_deleted_after_check(self):
+    def test_check_service_cache_deleted_after_check(self, cleared_cache):
         extension = CacheExtension()
 
         assert extension.check_service() is True
-        assert cache.get(self.key) is None
+        assert cleared_cache.get(self.key) is None
 
 
 class TestRqExtension:
     key = 'livewatch_rq'
 
-    def setup(self):
-        cache.delete(self.key)
-
-    def teardown(self):
-        # Let all running tasks finish...
-        time.sleep(1)
-
-        # Let the worker run in burst mode to clear the queue
-        worker = django_rq.get_worker()
-        worker.work(burst=True)
-
-        # Let the worker finish...
-        time.sleep(1)
-
-        # Cleanup cache key used in tests
-        cache.delete(self.key)
-
-    def test_check_service(self, rf, rq_worker):
+    def test_check_service(self, cleared_cache, rf, rq_worker):
         request = rf.get('/')
         extension = RqExtension()
 
@@ -128,7 +96,7 @@ class TestRqExtension:
         time.sleep(1)
         assert extension.check_service(request) is True
 
-    def test_check_service_not_in_cache(self, rf):
+    def test_check_service_not_in_cache(self, rf, cleared_cache):
         request = rf.get('/')
         extension = RqExtension()
 
@@ -139,29 +107,7 @@ class TestRqExtension:
 class TestCeleryExtension:
     key = 'livewatch_celery'
 
-    def setup(self):
-        # Purge celery queue...
-        celery.control.purge()
-
-        # Let the worker finish...
-        time.sleep(1)
-
-        cache.delete(self.key)
-
-    def teardown(self):
-        # Let all running tasks finish...
-        time.sleep(1)
-
-        # Purge celery queue...
-        celery.control.purge()
-
-        # Let the worker finish...
-        time.sleep(1)
-
-        # Clear cache.
-        cache.delete(self.key)
-
-    def test_check_service(self, rf, celery_worker):
+    def test_check_service(self, rf, celery_worker, cleared_cache):
         request = rf.get('/')
         extension = CeleryExtension()
 
@@ -169,7 +115,7 @@ class TestCeleryExtension:
         time.sleep(1)
         assert extension.check_service(request) is True
 
-    def test_check_service_not_in_cache(self, rf):
+    def test_check_service_not_in_cache(self, rf, cleared_cache):
         request = rf.get('/')
         extension = CeleryExtension()
 
