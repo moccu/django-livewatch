@@ -1,4 +1,6 @@
 from __future__ import absolute_import
+import os
+import signal
 
 import pytest
 import time
@@ -53,6 +55,9 @@ def celery_worker(request):
 
     proc.terminate()
     proc.join(10)
+
+    if proc.is_alive():
+        os.kill(proc.pid, signal.SIGKILL)
 
     celery.control.purge()
 
