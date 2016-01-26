@@ -11,7 +11,6 @@ from .celery import celery
 
 
 CELERY_WORKER_READY = list()
-RQ_WORKER_READY = list()
 
 
 @worker_ready.connect
@@ -57,7 +56,7 @@ def celery_worker(request):
 
     celery.control.purge()
 
-    CELERY_WORKER_READY.clear()
+    del CELERY_WORKER_READY[:]
 
 
 @pytest.yield_fixture
@@ -89,5 +88,3 @@ def rq_worker(request):
     proc.join(5)
 
     [queue.empty() for queue in django_rq.get_worker().queues]
-
-    RQ_WORKER_READY.clear()
