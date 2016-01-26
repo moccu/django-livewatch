@@ -56,8 +56,10 @@ def celery_worker(request):
     proc.terminate()
     proc.join(10)
 
-    if proc.is_alive():
+    try:
         os.kill(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
 
     celery.control.purge()
 
@@ -91,5 +93,10 @@ def rq_worker(request):
     # Wait for rq to exit, timeout 5 seconds.
     proc.terminate()
     proc.join(10)
+
+    try:
+        os.kill(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
 
     [queue.empty() for queue in django_rq.get_worker().queues]
