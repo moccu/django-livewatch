@@ -58,7 +58,7 @@ def celery_worker(request):
 
     try:
         os.kill(proc.pid, signal.SIGKILL)
-    except ProcessLookupError:
+    except:
         pass
 
     celery.control.purge()
@@ -96,7 +96,7 @@ def rq_worker(request):
 
     try:
         os.kill(proc.pid, signal.SIGKILL)
-    except ProcessLookupError:
+    except:
         pass
 
     [queue.empty() for queue in django_rq.get_worker().queues]
